@@ -5,6 +5,8 @@ import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import Logo from './components/Logo/Logo';
 import './App.css';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
+import Signin from './components/Signin/Signin';
+import Register from './components/Register/Register';
 import Rank from './components/Rank/Rank';
 import Particles from 'react-particles-js';
 
@@ -18,7 +20,9 @@ class App extends Component {
     this.state = {
       input: "",
       imgUrl: "",
-      box: {}
+      box: {},
+      route: "signin",
+      isSignedIn: false
     }
     this.onInputChange = this.onInputChange.bind(this);
     this.onButtonSubmit = this.onButtonSubmit.bind(this);
@@ -36,7 +40,6 @@ class App extends Component {
     }
   }
   displayFaceBox = box => {
-    console.log(box);
     this.setState({box: box})
   }
   onInputChange (evt) {
@@ -48,7 +51,17 @@ class App extends Component {
     .then(response => this.displayFaceBox(this.calculateFaceLocation(response)))
     .catch(err => console.log(err));
   }
+
+  onRouteChange = route => {
+    if(route === 'signout') {
+      this.setState({ isSignedIn: false})
+    } else if (route === 'home') {
+      this.setState({ isSignedIn: true})
+    }
+    this.setState({route: route})
+  }
   render() {
+    const { isSignedIn, route, box, imgUrl } = this.state;
     const particleOptions = {
       particles: {
         number: {
@@ -66,14 +79,23 @@ class App extends Component {
          params={particleOptions}
          className="particles"
        />
-       <Navigation name="Sign Out"/>
-       <Logo />
+       <Navigation name="Sign Out" onRouteChange={this.onRouteChange} isSignedIn={isSignedIn}/>
+       {route === "home" 
+          ? 
+        <>  
+        <Logo />
        <Rank />
        <ImageLinkForm 
         onInputChange={this.onInputChange}
         onButtonSubmit={this.onButtonSubmit}  
         />
-       <FaceRecognition box={this.state.box} imgUrl={this.state.imgUrl}/>
+       <FaceRecognition box={box} imgUrl={imgUrl}/>
+       </>
+       : (route === "signin"
+       ? <Signin onRouteChange={this.onRouteChange}/>
+       : <Register onRouteChange={this.onRouteChange}/>
+       )
+       }
      </div>
     );
   }
